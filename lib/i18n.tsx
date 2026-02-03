@@ -57,6 +57,9 @@ const translations = {
     bulletsImproved: 'Bullets Improved',
     keyInsights: 'Key Insights',
     changeFile: 'Change file',
+    poweredBy: 'Powered by',
+    termsOfUse: 'Terms of Use',
+    privacyPolicy: 'Privacy Policy',
   },
   he: {
     title: 'CV Snap',
@@ -110,6 +113,9 @@ const translations = {
     bulletsImproved: 'נקודות ששופרו',
     keyInsights: 'תובנות מרכזיות',
     changeFile: 'החלף קובץ',
+    poweredBy: 'מופעל על ידי',
+    termsOfUse: 'תנאי שימוש',
+    privacyPolicy: 'מדיניות פרטיות',
   },
 } as const;
 

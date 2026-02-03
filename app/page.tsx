@@ -242,7 +242,13 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-8 text-center text-sm text-gray-500">
-        <p>{t('footer')}</p>
+        <p className="mb-3">{t('footer')}</p>
+        <div className="flex items-center justify-center gap-4 mb-3">
+          <a href="/terms" className="hover:text-indigo-600 transition-colors">{t('termsOfUse')}</a>
+          <span>•</span>
+          <a href="/privacy" className="hover:text-indigo-600 transition-colors">{t('privacyPolicy')}</a>
+        </div>
+        <p className="text-xs text-gray-400">{t('poweredBy')} <span className="font-medium">Precision Point</span></p>
       </footer>
     </div>
   );
