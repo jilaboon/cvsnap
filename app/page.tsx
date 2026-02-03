@@ -43,16 +43,17 @@ export default function Home() {
       formData.append('jobDescription', jobDescription);
       formData.append('language', language);
 
-      const stepInterval = setInterval(() => {
-        setLoadingStep((prev) => Math.min(prev + 1, 2));
-      }, 25000);
+      // Step timing: 0-25s, 25-55s, 55-75s+
+      const step1Timeout = setTimeout(() => setLoadingStep(1), 25000);
+      const step2Timeout = setTimeout(() => setLoadingStep(2), 55000);
 
       const response = await fetch('/api/process', {
         method: 'POST',
         body: formData,
       });
 
-      clearInterval(stepInterval);
+      clearTimeout(step1Timeout);
+      clearTimeout(step2Timeout);
 
       const data = await response.json();
 

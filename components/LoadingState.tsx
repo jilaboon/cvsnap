@@ -12,16 +12,16 @@ export function LoadingState({ currentStep }: LoadingStateProps) {
   const [progress, setProgress] = useState(0);
 
   const steps = [
-    { key: 'step1', label: t('step1'), targetProgress: 30 },
-    { key: 'step2', label: t('step2'), targetProgress: 60 },
-    { key: 'step3', label: t('step3'), targetProgress: 92 },
+    { key: 'step1', label: t('step1'), targetProgress: 33, duration: 23000 },
+    { key: 'step2', label: t('step2'), targetProgress: 70, duration: 28000 },
+    { key: 'step3', label: t('step3'), targetProgress: 95, duration: 18000 },
   ];
 
-  // Smooth progress animation - spans ~25 seconds per step
+  // Smooth progress animation - timing: 0-25s, 25-55s, 55-75s+
   useEffect(() => {
-    const targetProgress = steps[Math.min(currentStep, 2)]?.targetProgress || 0;
-
-    const duration = 22000; // 22 seconds to animate within each step
+    const currentStepData = steps[Math.min(currentStep, 2)];
+    const targetProgress = currentStepData?.targetProgress || 0;
+    const duration = currentStepData?.duration || 20000;
     const startTime = Date.now();
     const startValue = progress;
 
