@@ -12,23 +12,24 @@ export function LoadingState({ currentStep }: LoadingStateProps) {
   const [progress, setProgress] = useState(0);
 
   const steps = [
-    { key: 'step1', label: t('step1'), targetProgress: 25 },
-    { key: 'step2', label: t('step2'), targetProgress: 50 },
-    { key: 'step3', label: t('step3'), targetProgress: 95 },
+    { key: 'step1', label: t('step1'), targetProgress: 30 },
+    { key: 'step2', label: t('step2'), targetProgress: 60 },
+    { key: 'step3', label: t('step3'), targetProgress: 92 },
   ];
 
-  // Smooth progress animation
+  // Smooth progress animation - spans ~25 seconds per step
   useEffect(() => {
     const targetProgress = steps[Math.min(currentStep, 2)]?.targetProgress || 0;
 
-    const duration = 8000;
+    const duration = 22000; // 22 seconds to animate within each step
     const startTime = Date.now();
     const startValue = progress;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progressRatio = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progressRatio, 3);
+      // Slower ease-out curve for more gradual progress
+      const easeOut = 1 - Math.pow(1 - progressRatio, 2);
       const newProgress = startValue + (targetProgress - startValue) * easeOut;
 
       setProgress(Math.min(newProgress, targetProgress));

@@ -45,7 +45,7 @@ export default function Home() {
 
       const stepInterval = setInterval(() => {
         setLoadingStep((prev) => Math.min(prev + 1, 2));
-      }, 12000);
+      }, 25000);
 
       const response = await fetch('/api/process', {
         method: 'POST',
