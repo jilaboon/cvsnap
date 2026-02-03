@@ -1,11 +1,10 @@
 import mammoth from 'mammoth';
+import { extractText as extractPdfText } from 'unpdf';
 
-// Extract text from PDF buffer using pdf-parse
+// Extract text from PDF buffer using unpdf (serverless-compatible)
 export async function extractFromPDF(buffer: Buffer): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse');
-  const data = await pdfParse(buffer);
-  return data.text.trim();
+  const { text } = await extractPdfText(new Uint8Array(buffer));
+  return text.join('\n').trim();
 }
 
 // Extract text from DOCX buffer
