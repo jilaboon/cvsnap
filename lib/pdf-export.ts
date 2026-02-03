@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { TDocumentDefinitions, Content } from 'pdfmake/interfaces';
+import { jsPDF } from 'jspdf';
 
 // Parse resume text into sections for better formatting
 function parseResumeText(text: string): { section: string; content: string[] }[] {
@@ -38,144 +37,120 @@ export async function createResumePdf(
   resumeText: string,
   _isRTL: boolean = false
 ): Promise<Buffer> {
-  // Dynamic imports to avoid issues with serverless
-  const pdfMakeModule = await import('pdfmake/build/pdfmake');
-  const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
 
-  const pdfMake = (pdfMakeModule.default || pdfMakeModule) as any;
-  const pdfFonts = (pdfFontsModule.default || pdfFontsModule) as any;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const contentWidth = pageWidth - 2 * margin;
+  let y = margin;
 
-  // Set up virtual file system for fonts
-  if (pdfFonts.pdfMake) {
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-  } else if (pdfFonts.vfs) {
-    pdfMake.vfs = pdfFonts.vfs;
-  }
+  const primaryColor: [number, number, number] = [79, 70, 229]; // indigo-600
+  const textColor: [number, number, number] = [31, 41, 55]; // gray-800
+  const lightGray: [number, number, number] = [107, 114, 128]; // gray-500
 
   const sections = parseResumeText(resumeText);
-  const content: Content[] = [];
 
-  const primaryColor = '#4f46e5';
-  const textColor = '#1f2937';
-  const lightGray = '#6b7280';
+  const checkPageBreak = (neededSpace: number) => {
+    if (y + neededSpace > doc.internal.pageSize.getHeight() - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  };
 
   for (let i = 0; i < sections.length; i++) {
     const section = sections[i];
 
     if (i === 0 && !section.section) {
+      // Header section (name, title, contact)
       const nameAndTitle = section.content.slice(0, 2);
       const rest = section.content.slice(2);
 
       if (nameAndTitle[0]) {
-        content.push({
-          text: nameAndTitle[0],
-          fontSize: 24,
-          bold: true,
-          color: textColor,
-          alignment: 'center',
-          margin: [0, 0, 0, 4] as [number, number, number, number],
-        });
-      }
-      if (nameAndTitle[1]) {
-        content.push({
-          text: nameAndTitle[1],
-          fontSize: 14,
-          color: primaryColor,
-          alignment: 'center',
-          margin: [0, 0, 0, 16] as [number, number, number, number],
-        });
-      }
-      if (rest.length > 0) {
-        content.push({
-          text: rest.join(' '),
-          fontSize: 10,
-          color: lightGray,
-          alignment: 'center',
-          margin: [0, 0, 0, 20] as [number, number, number, number],
-        });
-      }
-    } else {
-      if (section.section) {
-        content.push({
-          text: section.section,
-          fontSize: 12,
-          bold: true,
-          color: primaryColor,
-          margin: [0, 16, 0, 8] as [number, number, number, number],
-          alignment: 'left',
-        });
-        content.push({
-          canvas: [
-            {
-              type: 'line',
-              x1: 0,
-              y1: 0,
-              x2: 515,
-              y2: 0,
-              lineWidth: 1,
-              lineColor: '#e5e7eb',
-            },
-          ],
-          margin: [0, 0, 0, 8] as [number, number, number, number],
-        });
+        checkPageBreak(12);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...textColor);
+        doc.text(nameAndTitle[0], pageWidth / 2, y, { align: 'center' });
+        y += 8;
       }
 
+      if (nameAndTitle[1]) {
+        checkPageBreak(8);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...primaryColor);
+        doc.text(nameAndTitle[1], pageWidth / 2, y, { align: 'center' });
+        y += 6;
+      }
+
+      if (rest.length > 0) {
+        checkPageBreak(8);
+        doc.setFontSize(9);
+        doc.setTextColor(...lightGray);
+        const contactText = rest.join(' | ');
+        const lines = doc.splitTextToSize(contactText, contentWidth);
+        doc.text(lines, pageWidth / 2, y, { align: 'center' });
+        y += lines.length * 4 + 8;
+      }
+    } else {
+      // Regular section
+      if (section.section) {
+        checkPageBreak(14);
+        y += 6;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...primaryColor);
+        doc.text(section.section, margin, y);
+        y += 2;
+
+        // Divider line
+        doc.setDrawColor(229, 231, 235);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 6;
+      }
+
+      // Section content
       for (const line of section.content) {
         const isBullet = line.startsWith('-') || line.startsWith('•') || line.startsWith('*');
         const isJobHeader = line.includes(' | ') && !isBullet;
 
         if (isBullet) {
-          const bulletText = line.replace(/^[-•*]\s*/, '');
-          content.push({
-            text: `• ${bulletText}`,
-            fontSize: 10,
-            color: textColor,
-            margin: [12, 2, 0, 2] as [number, number, number, number],
-            alignment: 'left',
-          });
+          const bulletText = '• ' + line.replace(/^[-•*]\s*/, '');
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...textColor);
+          const lines = doc.splitTextToSize(bulletText, contentWidth - 8);
+          checkPageBreak(lines.length * 4 + 2);
+          doc.text(lines, margin + 4, y);
+          y += lines.length * 4 + 1;
         } else if (isJobHeader) {
-          content.push({
-            text: line,
-            fontSize: 11,
-            bold: true,
-            color: textColor,
-            margin: [0, 8, 0, 4] as [number, number, number, number],
-            alignment: 'left',
-          });
+          checkPageBreak(8);
+          y += 3;
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...textColor);
+          const lines = doc.splitTextToSize(line, contentWidth);
+          doc.text(lines, margin, y);
+          y += lines.length * 4 + 2;
         } else {
-          content.push({
-            text: line,
-            fontSize: 10,
-            color: textColor,
-            margin: [0, 2, 0, 2] as [number, number, number, number],
-            alignment: 'left',
-          });
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...textColor);
+          const lines = doc.splitTextToSize(line, contentWidth);
+          checkPageBreak(lines.length * 4 + 2);
+          doc.text(lines, margin, y);
+          y += lines.length * 4 + 1;
         }
       }
     }
   }
 
-  const docDefinition: TDocumentDefinitions = {
-    pageSize: 'A4',
-    pageMargins: [40, 40, 40, 40],
-    content,
-    defaultStyle: {
-      font: 'Roboto'
-    },
-    info: {
-      title: 'Tailored Resume',
-      author: 'CV Snap',
-    },
-  };
-
-  return new Promise((resolve, reject) => {
-    try {
-      const pdfDoc = pdfMake.createPdf(docDefinition);
-      pdfDoc.getBuffer((buffer: Uint8Array) => {
-        resolve(Buffer.from(buffer));
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
+  // Return as Buffer
+  const arrayBuffer = doc.output('arraybuffer');
+  return Buffer.from(arrayBuffer);
 }
