@@ -1,28 +1,11 @@
 import mammoth from 'mammoth';
 
-// Extract text from PDF buffer
+// Extract text from PDF buffer using pdf-parse
 export async function extractFromPDF(buffer: Buffer): Promise<string> {
-  // Dynamic import to avoid bundling issues
-  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-
-  // Disable worker for serverless environment
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-
-  const data = new Uint8Array(buffer);
-  const pdf = await pdfjsLib.getDocument({ data, useWorkerFetch: false, isEvalSupported: false, useSystemFonts: true }).promise;
-
-  let fullText = '';
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item) => ('str' in item ? item.str : ''))
-      .join(' ');
-    fullText += pageText + '\n';
-  }
-
-  return fullText.trim();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse');
+  const data = await pdfParse(buffer);
+  return data.text.trim();
 }
 
 // Extract text from DOCX buffer
