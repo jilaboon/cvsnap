@@ -1,10 +1,15 @@
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import mammoth from 'mammoth';
 
 // Extract text from PDF buffer
 export async function extractFromPDF(buffer: Buffer): Promise<string> {
+  // Dynamic import to avoid bundling issues
+  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+
+  // Disable worker for serverless environment
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+
   const data = new Uint8Array(buffer);
-  const pdf = await pdfjsLib.getDocument({ data }).promise;
+  const pdf = await pdfjsLib.getDocument({ data, useWorkerFetch: false, isEvalSupported: false, useSystemFonts: true }).promise;
 
   let fullText = '';
 
