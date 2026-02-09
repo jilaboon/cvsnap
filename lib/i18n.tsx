@@ -60,6 +60,17 @@ const translations = {
     poweredBy: 'Powered by',
     termsOfUse: 'Terms of Use',
     privacyPolicy: 'Privacy Policy',
+    // Usage & Upgrade
+    usesRemaining: 'uses left',
+    upgradeTitle: 'You\'ve used all your free snaps',
+    upgradeDescription: 'Upgrade to keep tailoring your resume to every job you apply for.',
+    tierStarter: 'Starter',
+    tierStarterDesc: '10 resume tailors',
+    tierPro: 'Pro',
+    tierProDesc: '50 resume tailors',
+    buyNow: 'Buy Now',
+    bestValue: 'Best Value',
+    purchaseSuccess: 'Purchase activated! You now have {0} uses.',
   },
   he: {
     title: 'CV Snap',
@@ -116,6 +127,17 @@ const translations = {
     poweredBy: 'מופעל על ידי',
     termsOfUse: 'תנאי שימוש',
     privacyPolicy: 'מדיניות פרטיות',
+    // Usage & Upgrade
+    usesRemaining: 'שימושים נותרו',
+    upgradeTitle: 'השימושים החינמיים נגמרו',
+    upgradeDescription: 'שדרג כדי להמשיך להתאים את קורות החיים שלך לכל משרה.',
+    tierStarter: 'סטארטר',
+    tierStarterDesc: '10 התאמות קורות חיים',
+    tierPro: 'פרו',
+    tierProDesc: '50 התאמות קורות חיים',
+    buyNow: 'קנה עכשיו',
+    bestValue: 'הכי משתלם',
+    purchaseSuccess: 'הרכישה הופעלה! יש לך {0} שימושים.',
   },
 } as const;
 

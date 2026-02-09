@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { FileUpload } from '@/components/FileUpload';
@@ -9,6 +9,10 @@ import { LoadingState } from '@/components/LoadingState';
 import { ResultTabs } from '@/components/ResultTabs';
 import { GenerationOutput } from '@/types';
 import { AtsTooltip } from '@/components/AtsTooltip';
+import { UpgradeModal } from '@/components/UpgradeModal';
+import { UsageIndicator } from '@/components/UsageIndicator';
+import { canProcess, incrementUsage, getRemainingUses, applyPurchase } from '@/lib/usage';
+import type { Tier } from '@/lib/usage';
 import Image from 'next/image';
 
 type AppState = 'form' | 'loading' | 'results';
@@ -22,6 +26,26 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [results, setResults] = useState<GenerationOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [remainingUses, setRemainingUses] = useState<number | null>(null);
+
+  const refreshUsage = useCallback(() => {
+    setRemainingUses(getRemainingUses());
+  }, []);
+
+  // Initialize usage count and handle purchase redirect
+  useEffect(() => {
+    refreshUsage();
+
+    const params = new URLSearchParams(window.location.search);
+    const purchased = params.get('purchased') as Tier | null;
+    if (purchased === 'starter' || purchased === 'pro') {
+      applyPurchase(purchased);
+      refreshUsage();
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [refreshUsage]);
 
   const handleSubmit = async () => {
     if (!file) {
@@ -30,6 +54,10 @@ export default function Home() {
     }
     if (!jobDescription.trim()) {
       setError(t('errorJob'));
+      return;
+    }
+    if (!canProcess()) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -61,6 +89,8 @@ export default function Home() {
         throw new Error(data.error || t('errorProcess'));
       }
 
+      incrementUsage();
+      refreshUsage();
       setResults(data.data);
       setState('results');
     } catch (err) {
@@ -124,7 +154,15 @@ export default function Home() {
               {t('title')}
             </span>
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-3">
+            {remainingUses !== null && (
+              <UsageIndicator
+                remaining={remainingUses}
+                onClick={() => remainingUses === 0 && setShowUpgradeModal(true)}
+              />
+            )}
+            <LanguageToggle />
+          </div>
         </div>
       </header>
 
@@ -250,6 +288,11 @@ export default function Home() {
         </div>
         <p className="text-xs text-gray-400">{t('poweredBy')} <span className="font-medium">Precision Point</span></p>
       </footer>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
     </div>
   );
 }
