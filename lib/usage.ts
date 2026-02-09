@@ -13,10 +13,28 @@ interface UsageData {
   tier: Tier;
 }
 
-export const PAYMENT_LINKS = {
-  starter: 'GROW_LINK_STARTER',
-  pro: 'GROW_LINK_PRO',
+// NIS payments (Hebrew users + English users in Israel)
+export const GROW_LINKS = {
+  starter: 'GROW_LINK_STARTER_NIS',
+  pro: 'GROW_LINK_PRO_NIS',
 };
+
+// USD payments (English users outside Israel)
+export const TRANZILA_LINKS = {
+  starter: 'TRANZILA_LINK_STARTER_USD',
+  pro: 'TRANZILA_LINK_PRO_USD',
+};
+
+export const PRICES = {
+  nis: { starter: '₪35', pro: '₪69' },
+  usd: { starter: '$9', pro: '$19' },
+};
+
+export function isIsraeliLocale(): boolean {
+  if (typeof window === 'undefined') return false;
+  const lang = navigator.language || '';
+  return lang.startsWith('he') || lang.includes('IL');
+}
 
 function getUsageData(): UsageData {
   if (typeof window === 'undefined') {
