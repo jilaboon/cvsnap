@@ -23,65 +23,73 @@ function createStyles(isRTL: boolean) {
 
   return StyleSheet.create({
     page: {
-      paddingTop: 56,
-      paddingBottom: 56,
-      paddingHorizontal: 56,
+      paddingTop: 40,
+      paddingBottom: 40,
+      paddingHorizontal: 50,
       fontFamily: 'Helvetica',
       fontSize: 9,
+      lineHeight: 1.4,
       color: colors.textDark,
     },
     headerName: {
       fontSize: 20,
       fontFamily: 'Helvetica-Bold',
+      lineHeight: 1.3,
       color: colors.textDark,
       textAlign: 'center',
-      marginBottom: 4,
+      marginBottom: 2,
     },
     headerTitle: {
       fontSize: 12,
+      lineHeight: 1.3,
       color: colors.primary,
       textAlign: 'center',
       marginBottom: 4,
     },
     headerContact: {
       fontSize: 9,
+      lineHeight: 1.3,
       color: colors.textLight,
       textAlign: 'center',
-      marginBottom: 16,
+      marginBottom: 14,
     },
     sectionHeader: {
-      marginTop: 12,
-      marginBottom: 6,
+      marginTop: 10,
+      marginBottom: 4,
       borderBottomWidth: 0.75,
       borderBottomColor: colors.divider,
-      paddingBottom: 3,
+      paddingBottom: 2,
     },
     sectionHeaderText: {
       fontSize: 11,
       fontFamily: 'Helvetica-Bold',
+      lineHeight: 1.3,
       color: colors.primary,
       textAlign: align,
     },
     jobHeader: {
       fontSize: 10,
       fontFamily: 'Helvetica-Bold',
+      lineHeight: 1.3,
       color: colors.textDark,
-      marginTop: 6,
-      marginBottom: 3,
+      marginTop: 8,
+      marginBottom: 2,
       textAlign: align,
     },
     bullet: {
       fontSize: 9,
+      lineHeight: 1.4,
       color: colors.textDark,
       paddingLeft: isRTL ? 0 : 10,
       paddingRight: isRTL ? 10 : 0,
-      marginBottom: 1.5,
+      marginBottom: 3,
       textAlign: align,
     },
     plainText: {
       fontSize: 9,
+      lineHeight: 1.4,
       color: colors.textDark,
-      marginBottom: 1.5,
+      marginBottom: 3,
       textAlign: align,
     },
   });
@@ -119,9 +127,9 @@ function ContentLine({ line, styles }: { line: string; styles: Styles }) {
 
 function SectionBlock({ section, styles }: { section: ResumeSection; styles: Styles }) {
   return (
-    <View wrap={false}>
+    <View>
       {section.section && (
-        <View style={styles.sectionHeader}>
+        <View style={styles.sectionHeader} minPresenceAhead={40}>
           <Text style={styles.sectionHeaderText}>{section.section}</Text>
         </View>
       )}
