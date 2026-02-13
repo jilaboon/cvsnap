@@ -9,39 +9,7 @@ import {
   TabStopType,
   TabStopPosition,
 } from 'docx';
-
-// Parse resume text into sections
-function parseResumeText(text: string): { section: string; content: string[] }[] {
-  const lines = text.split('\n');
-  const sections: { section: string; content: string[] }[] = [];
-  let currentSection = { section: '', content: [] as string[] };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-
-    const isHeader = trimmed === trimmed.toUpperCase() &&
-                     trimmed.length > 2 &&
-                     trimmed.length < 30 &&
-                     !trimmed.startsWith('-') &&
-                     !trimmed.startsWith('•');
-
-    if (isHeader) {
-      if (currentSection.section || currentSection.content.length > 0) {
-        sections.push(currentSection);
-      }
-      currentSection = { section: trimmed, content: [] };
-    } else {
-      currentSection.content.push(trimmed);
-    }
-  }
-
-  if (currentSection.section || currentSection.content.length > 0) {
-    sections.push(currentSection);
-  }
-
-  return sections;
-}
+import { parseResumeText } from './resume-parser';
 
 export async function createResumeDocx(
   resumeText: string,
